@@ -1,0 +1,70 @@
+version: "3.9"
+
+x-networks: &networks
+  networks:
+    - shopxo-network
+
+x-shopxo-shared-conf: &shopxo-shared-conf
+  <<: *networks
+  depends_on:
+    shopxo-db:
+      condition: service_healthy
+
+services:
+  shopxo-db:
+    <<: *networks
+    image: mysql:8.0
+    restart: unless-stopped
+    expose:
+      - 3306
+    ports:
+      - ${MYSQL_EXTERNAL_PORT:-13306}:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-123456}
+    volumes:
+      - type: volume
+        source: shopxo-db
+        target: /var/lib/mysql
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=$$MYSQL_ROOT_PASSWORD --execute \"SHOW DATABASES;\""
+      interval: 5s
+      timeout: 30s
+      retries: 20
+  shopxo-php:
+    <<: *shopxo-shared-conf
+#    build:
+#      dockerfile: ./shopxo-image/Dockerfile
+#      args:
+#        - PHP_VER=${PHP_VER:-8.1.16-fpm-bullseye}
+#        - SHOPXO_VER=${SHOPXO_VER:-2.3.2}
+    image: wxc252/shopxo:${SHOPXO_VER:-2.3.2}
+    restart: unless-stopped
+    expose:
+      - 9000
+    volumes:
+      - type: volume
+        source: shopxo-web
+        target: /var/www/shopxo
+  showxo-web:
+    <<: *shopxo-shared-conf
+    image: nginx
+    restart: unless-stopped
+    expose:
+      - 80
+      - 443
+    ports:
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
+    volumes:
+      - type: bind
+        source: ./conf/nginx/conf.d
+        target: /etc/nginx/conf.d
+      - type: volume
+        source: shopxo-web
+        target: /var/www/shopxo
+networks:
+  shopxo-network:
+
+volumes:
+  shopxo-db:
+  shopxo-web:
