@@ -25,5 +25,21 @@ flush privileges;
 11. 当配置完毕后，进入php容器 sudo docker exec -it shopxo-docker-shopxo-php-1 /bin/bash
 12. 按照提示删除install目录 rm -rf /var/www/shopxo/app/install
 
+## 构建镜像的命令
+```bash
+## 常规构建
+sudo docker build shopxo-image \
+  --build-arg SHOPXO_VER=2.3.2 \
+  -t wxc252/shopxo:2.3.2 \
+  --push
+##  构建多平台镜像
+sudo docker buildx create --name mybuilder --use
+sudo docker buildx build shopxo-image \
+  --platform linux/386,linux/amd64,linux/arm/v5,linux/arm/v7,linux/arm64/v8,linux/mips64le,linux/ppc64le,linux/s390x \
+  --build-arg SHOPXO_VER=2.3.2 \
+  -t wxc252/shopxo:2.3.2 \
+  --push
+```
+
 
 
