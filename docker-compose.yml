@@ -25,6 +25,9 @@ services:
       - type: volume
         source: shopxo-db
         target: /var/lib/mysql
+      - type: bind
+        source: ./conf/init-db
+        target: /docker-entrypoint-initdb.d
     healthcheck:
       test: "/usr/bin/mysql --user=root --password=$$MYSQL_ROOT_PASSWORD --execute \"SHOW DATABASES;\""
       interval: 5s

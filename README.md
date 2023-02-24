@@ -6,7 +6,7 @@
 3. sudo docker compose up -d
 4. sudo docker exec -it shopxo-docker-shopxo-db-1 /bin/bash
 5. mysql -uroot -p123456 （假设123456为默认的root密码）
-6. 创建数据库用户等，参考
+6. 创建数据库用户等，参考(已经迁移到./conf/init-db/init-shopxo.sql, 请根据实际情况调整)
 ```mysql
 create database if not exists shopxo;
 create user 'shopxo'@'%' identified by '123456';
